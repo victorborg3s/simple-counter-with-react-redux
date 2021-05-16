@@ -5,13 +5,28 @@ import { bindActionCreators } from 'redux'
 import type { AppState, AppDispatch } from '../';
 import CounterActions from './CounterActions';
 
+function selectCounterPropsFromState(state: AppState) {
+  return {
+    value: state.counterSlice.value,
+  };
+}
+
 interface CounterProps {
   value: number,
   increment: () => void,
   decrement: () => void,
+  startUpdateDetection: () => void,
+  clearUpdateDetection: () => void,
 }
 
-function Counter({ value, increment, decrement }: CounterProps) {
+function Counter({
+  value, increment, decrement, startUpdateDetection, clearUpdateDetection,
+}: CounterProps) {
+  React.useEffect(() => {
+    startUpdateDetection();
+    return clearUpdateDetection;
+  }, [startUpdateDetection, clearUpdateDetection]);
+
   return (
     <section>
       <header>
@@ -26,12 +41,15 @@ function Counter({ value, increment, decrement }: CounterProps) {
     </section>
   );
 }
-const mapStateToProps = (state: AppState) => state.CounterReducer;
+
+const mapStateToProps = (state: AppState) => selectCounterPropsFromState(state);
 
 const mapDispatchToProps = (dispatch: AppDispatch) => {
   return bindActionCreators({
     increment: CounterActions.increment,
     decrement: CounterActions.decrement,
+    startUpdateDetection: CounterActions.startUpdateDetection,
+    clearUpdateDetection: CounterActions.clearUpdateDetection,
   }, dispatch);
 };
 
@@ -39,4 +57,3 @@ export default connect(
     mapStateToProps,
     mapDispatchToProps
 )(Counter)
-
